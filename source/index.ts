@@ -48,7 +48,7 @@ const getObjectType = (value: any): TypeName | null => {
 	return null;
 };
 
-const isObjectOfType = (type: TypeName) => (value: any) => getObjectType(value) === type;
+const isObjectOfType = <T>(type: TypeName) => (value: any): value is T => getObjectType(value) === type;
 
 function is(value: any): TypeName { // tslint:disable-line:only-arrow-functions
 	if (value === null) {
@@ -109,56 +109,56 @@ namespace is { // tslint:disable-line:no-namespace
 	export const string = isOfType<string>('string');
 	export const number = isOfType<number>('number');
 	export const function_ = isOfType<Function>('function');
-	export const null_ = (value: any) => value === null;
+	export const null_ = (value: any): value is null => value === null;
 	export const class_ = (value: any) => function_(value) && value.toString().startsWith('class ');
-	export const boolean = (value: any) => value === true || value === false;
+	export const boolean = (value: any): value is boolean => value === true || value === false;
 	export const symbol = isOfType<Symbol>('symbol');
 	// tslint:enable:variable-name
 
 	export const array = Array.isArray;
 	export const buffer = Buffer.isBuffer;
 
-	export const nullOrUndefined = (value: any) => null_(value) || undefined(value);
+	export const nullOrUndefined = (value: any): value is null | undefined => null_(value) || undefined(value);
 	export const object = (value: any) => !nullOrUndefined(value) && (function_(value) || isObject(value));
-	export const iterable = (value: any) => !nullOrUndefined(value) && function_(value[Symbol.iterator]);
-	export const generator = (value: any) => iterable(value) && function_(value.next) && function_(value.throw);
+	export const iterable = <T = any>(value: any): value is Iterator<T> => !nullOrUndefined(value) && function_(value[Symbol.iterator]);
+	export const generator = (value: any): value is Generator => iterable(value) && function_(value.next) && function_(value.throw);
 
-	export const nativePromise = isObjectOfType(TypeName.Promise);
+	export const nativePromise = isObjectOfType<Promise<any>>(TypeName.Promise);
 
-	const hasPromiseAPI = (value: any) =>
+	const hasPromiseAPI = <T = any>(value: any): value is Promise<T> =>
 		!null_(value) &&
 		isObject(value) &&
 		function_(value.then) &&
 		function_(value.catch);
 
-	export const promise = (value: any) => nativePromise(value) || hasPromiseAPI(value);
+	export const promise = <T = any>(value: any): value is Promise<T> => nativePromise(value) || hasPromiseAPI<T>(value);
 
-	const isFunctionOfType = (type: TypeName) => isObjectOfType(type);
-	export const generatorFunction = isFunctionOfType(TypeName.GeneratorFunction);
-	export const asyncFunction = isFunctionOfType(TypeName.AsyncFunction);
-	export const boundFunction = (value: any) => function_(value) && !value.hasOwnProperty('prototype');
+	const isFunctionOfType = <T>(type: TypeName) => isObjectOfType<T>(type);
+	export const generatorFunction = isFunctionOfType<GeneratorFunction>(TypeName.GeneratorFunction);
+	export const asyncFunction = isFunctionOfType<Function>(TypeName.AsyncFunction);
+	export const boundFunction = (value: any): value is Function => function_(value) && !value.hasOwnProperty('prototype');
 
-	export const regExp = isObjectOfType(TypeName.RegExp);
-	export const date = isObjectOfType(TypeName.Date);
-	export const error = isObjectOfType(TypeName.Error);
-	export const map = isObjectOfType(TypeName.Map);
-	export const set = isObjectOfType(TypeName.Set);
-	export const weakMap = isObjectOfType(TypeName.WeakMap);
-	export const weakSet = isObjectOfType(TypeName.WeakSet);
+	export const regExp = isObjectOfType<RegExp>(TypeName.RegExp);
+	export const date = isObjectOfType<Date>(TypeName.Date);
+	export const error = isObjectOfType<Error>(TypeName.Error);
+	export const map = isObjectOfType<Map<any, any>>(TypeName.Map);
+	export const set = isObjectOfType<Set<any>>(TypeName.Set);
+	export const weakMap = isObjectOfType<WeakMap<any, any>>(TypeName.WeakMap);
+	export const weakSet = isObjectOfType<WeakSet<any>>(TypeName.WeakSet);
 
-	export const int8Array = isObjectOfType(TypeName.Int8Array);
-	export const uint8Array = isObjectOfType(TypeName.Uint8Array);
-	export const uint8ClampedArray = isObjectOfType(TypeName.Uint8ClampedArray);
-	export const int16Array = isObjectOfType(TypeName.Int16Array);
-	export const uint16Array = isObjectOfType(TypeName.Uint16Array);
-	export const int32Array = isObjectOfType(TypeName.Int32Array);
-	export const uint32Array = isObjectOfType(TypeName.Uint32Array);
-	export const float32Array = isObjectOfType(TypeName.Float32Array);
-	export const float64Array = isObjectOfType(TypeName.Float64Array);
+	export const int8Array = isObjectOfType<Int8Array>(TypeName.Int8Array);
+	export const uint8Array = isObjectOfType<Uint8Array>(TypeName.Uint8Array);
+	export const uint8ClampedArray = isObjectOfType<Uint8ClampedArray>(TypeName.Uint8ClampedArray);
+	export const int16Array = isObjectOfType<Int16Array>(TypeName.Int16Array);
+	export const uint16Array = isObjectOfType<Uint16Array>(TypeName.Uint16Array);
+	export const int32Array = isObjectOfType<Int32Array>(TypeName.Int32Array);
+	export const uint32Array = isObjectOfType<Uint32Array>(TypeName.Uint32Array);
+	export const float32Array = isObjectOfType<Float32Array>(TypeName.Float32Array);
+	export const float64Array = isObjectOfType<Float64Array>(TypeName.Float64Array);
 
-	export const arrayBuffer = isObjectOfType(TypeName.ArrayBuffer);
+	export const arrayBuffer = isObjectOfType<ArrayBuffer>(TypeName.ArrayBuffer);
 	export const sharedArrayBuffer = isObjectOfType(TypeName.SharedArrayBuffer);
-	export const dataView = isObjectOfType(TypeName.DataView);
+	export const dataView = isObjectOfType<DataView>(TypeName.DataView);
 
 	export const directInstanceOf = (instance: any, klass: any) => Object.getPrototypeOf(instance) === klass.prototype;
 
