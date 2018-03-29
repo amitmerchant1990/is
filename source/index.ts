@@ -36,7 +36,7 @@ export const enum TypeName {
 }
 
 const toString = Object.prototype.toString;
-const isOfType = (type: string) => (value: any) => typeof value === type; // tslint:disable-line:strict-type-predicates
+const isOfType = <T>(type: string) => (value: any): value is T => typeof value === type; // tslint:disable-line:strict-type-predicates
 
 const getObjectType = (value: any): TypeName | null => {
 	const objectName = toString.call(value).slice(8, -1) as string;
@@ -105,14 +105,14 @@ namespace is { // tslint:disable-line:no-namespace
 	const isObject = (value: any) => typeof value === 'object';
 
 	// tslint:disable:variable-name
-	export const undefined = isOfType('undefined');
-	export const string = isOfType('string');
-	export const number = isOfType('number');
-	export const function_ = isOfType('function');
+	export const undefined = isOfType<undefined>('undefined');
+	export const string = isOfType<string>('string');
+	export const number = isOfType<number>('number');
+	export const function_ = isOfType<Function>('function');
 	export const null_ = (value: any) => value === null;
 	export const class_ = (value: any) => function_(value) && value.toString().startsWith('class ');
 	export const boolean = (value: any) => value === true || value === false;
-	export const symbol = isOfType('symbol');
+	export const symbol = isOfType<Symbol>('symbol');
 	// tslint:enable:variable-name
 
 	export const array = Array.isArray;
@@ -215,7 +215,7 @@ namespace is { // tslint:disable-line:no-namespace
 
 	export const inRange = (value: number, range: number | number[]) => {
 		if (number(range)) {
-			return value >= Math.min(0, range as number) && value <= Math.max(range as number, 0);
+			return value >= Math.min(0, range) && value <= Math.max(range, 0);
 		}
 
 		if (array(range) && range.length === 2) {
